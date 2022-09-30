@@ -40,7 +40,12 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     if(empty($name_err) && empty($address_err) && empty($salary_err)){
         // Chuẩn bị một câu lệnh insert
         $sql = "INSERT INTO employees (name, address, salary) VALUES (?, ?, ?)";
-         
+        if(mysqli_query($link, $sql)){
+            // Lấy ID đã chèn cuối cùng
+            $last_id = mysqli_insert_id($link);
+        } else{
+            echo "ERROR: Không thể thực thi câu lệnh $sql. " . mysqli_error($link);
+        }
         if($stmt = mysqli_prepare($link, $sql)){
             // Liên kết các biến với câu lệnh đã chuẩn bị
             mysqli_stmt_bind_param($stmt, "sss", $param_name, $param_address, $param_salary);
@@ -49,10 +54,11 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
             $param_name = $name;
             $param_address = $address;
             $param_salary = $salary;
-            
             // Cố gắng thực thi câu lệnh đã chuẩn bị
             if(mysqli_stmt_execute($stmt)){
                 // Tạo bản ghi thành công. Chuyển hướng đến trang đích
+                $message = "Chèn bản ghi thành công. ID đã chèn cuối cùng là: " . $last_id;
+                echo "<script type='text/javascript'>alert('$message');</script>";
                 header("location: index.php");
                 exit();
             } else{
